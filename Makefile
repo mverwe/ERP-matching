@@ -22,7 +22,7 @@ COMMONOBJ =
 PROGSRC = generate_pseudodata.cc matchmaking.cc process_CSV_qualtrics.cc
 PROGOBJ = generate_pseudodata.o matchmaking.o process_CSV_qualtrics.o
 
-all = generate_pseudodata matchmaking process_CSV_qualtrics
+all : generate_pseudodata matchmaking process_CSV_qualtrics
 
 INCLUDE += `root-config --cflags`
 LIBRARIES  += `root-config --glibs`
