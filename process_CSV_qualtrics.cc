@@ -112,13 +112,13 @@ int main() {
     counter++;
     std::cout << "top 3 of group " << counter << " email contactperson: " << row[18] << std::endl;
     std::cout << "1: " << row[19] << "\n";
-    std::cout << "1: " << row[20] << "\n";
-    std::cout << "1: " << row[21] << "\n";
+    std::cout << "2: " << row[20] << "\n";
+    std::cout << "3: " << row[21] << "\n";
     if(counter>2) {
       fout << "# group " << igroup << " " << row[18] << std::endl;
-      fout << "1: " << row[19] << "\n";
-      fout << "1: " << row[20] << "\n";
-      fout << "1: " << row[21] << "\n";
+      fout <<  row[19] << "\n";
+      fout <<  row[20] << "\n";
+      fout <<  row[21] << "\n";
       igroup++;
     }
   }
