@@ -25,10 +25,18 @@ std::string first_numberstring(std::string const & str)
   return std::string();
 }
 
-int main() {
+int main(int argc, char *argv[]) {
 
-  std::ifstream infile("/Users/mverweij/wrk/UU/ExperimentalDesign/ProjectAllocation/top_picks_gaus.dat");
+  std::copy(argv, argv + argc, std::ostream_iterator<char *>(std::cout, "\n"));
 
+  if(argc != 2) {
+    std::cout << "command line input missing. usage: ./randomize_top_picks inputfile.dat" << std::endl;
+    return 1;
+  }
+
+  
+  std::ifstream infile(argv[1]);
+ 
   std::vector<string> header;
   std::vector<std::vector<int>> top_picks; //length of number of groups
   int counter = -1;

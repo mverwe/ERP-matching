@@ -18,7 +18,7 @@
 
 using namespace std;
 
-int run(double prob1 = 40., double prob2 = 35., double prob3 = 25., int trial = 0);
+int run(double prob1 = 40., double prob2 = 35., double prob3 = 25., int trial = 0, std::string strfile = "/Users/mverweij/wrk/UU/ExperimentalDesign/ERP-matching/top_picks_shuffle.dat");
 
 std::string first_numberstring(std::string const & str)
 {
@@ -34,31 +34,38 @@ std::string first_numberstring(std::string const & str)
 
 //int main(double prob1 = 40., double prob2 = 35., double prob3 = 25.) {
 
-int main() {
+int main(int argc, char *argv[]) {
 
-  int ntrials = 1;//10000;
+  std::copy(argv, argv + argc, std::ostream_iterator<char *>(std::cout, "\n"));
+
+  if(argc != 3) {
+    std::cout << "command line input missing. usage: ./matchmaking inputfile.dat 10" << std::endl;
+    return 1;
+  }
+
+  std::string instr(argv[1]);
+  
+  int ntrials = atoi(argv[2]);//10000;
   for(int i = 0; i<ntrials; ++i) {
     //run(40.,35.,25.,i);
     //run(50.,30.,20.,i);
     // run(60.,20.,10.,i);
     //run(70.,15.,5.,i);
-    run(58.,26.,16.,i); //based on output of run(70.,15.,5.,i);
+    run(58.,26.,16.,i,instr); //based on output of run(70.,15.,5.,i);
   }
  
   return 0;
 }
 
-int run(double prob1, double prob2, double prob3, int trial) {
+int run(double prob1, double prob2, double prob3, int trial, std::string strfile) {
 
   //Assign probability for 1st, 2nd, 3rd. Deal with random assignment later?
   double prob[3] = {prob1, prob2, prob3};//{40.,35.,25.};
    
-  std::ifstream infile("/Users/mverweij/wrk/UU/ExperimentalDesign/ERP-matching/top_picks_shuffle.dat");
+  std::ifstream infile(strfile.c_str());
   //std::ifstream infile("/Users/mverweij/wrk/UU/ExperimentalDesign/ProjectAllocation/top_picks_gaus.dat");
 
-  //  std::string instring;
   std::string line;
-
 
   std::vector<std::vector<int>> top_picks; //length of number of groups
   int counter = -1;
