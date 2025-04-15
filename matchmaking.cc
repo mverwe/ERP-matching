@@ -12,7 +12,7 @@
 #include "TH1F.h"
 #include "TH2F.h"
 #include "TParameter.h"
-
+#include "TTree.h"
 
 #include "ProgressBar.h"
 
@@ -36,7 +36,7 @@ std::string first_numberstring(std::string const & str)
 
 int main() {
 
-  int ntrials = 10000;
+  int ntrials = 1;//10000;
   for(int i = 0; i<ntrials; ++i) {
     //run(40.,35.,25.,i);
     //run(50.,30.,20.,i);
@@ -53,8 +53,8 @@ int run(double prob1, double prob2, double prob3, int trial) {
   //Assign probability for 1st, 2nd, 3rd. Deal with random assignment later?
   double prob[3] = {prob1, prob2, prob3};//{40.,35.,25.};
    
-  // std::ifstream infile("/Users/mverweij/wrk/UU/ExperimentalDesign/ProjectAllocation/top_picks_flat.dat");
-  std::ifstream infile("/Users/mverweij/wrk/UU/ExperimentalDesign/ProjectAllocation/top_picks_gaus.dat");
+  std::ifstream infile("/Users/mverweij/wrk/UU/ExperimentalDesign/ERP-matching/top_picks_shuffle.dat");
+  //std::ifstream infile("/Users/mverweij/wrk/UU/ExperimentalDesign/ProjectAllocation/top_picks_gaus.dat");
 
   //  std::string instring;
   std::string line;
@@ -63,14 +63,18 @@ int run(double prob1, double prob2, double prob3, int trial) {
   std::vector<std::vector<int>> top_picks; //length of number of groups
   int counter = -1;
   std::vector<int> sel;
+  std::vector<int> groupnr;
+  std::vector<string> header;
   //sel.reserve(3);
   if ( infile.is_open() ) { // always check whether the file is open
     while (  std::getline(infile,line) ) { 
       int igroup = -1;
 
       if (line.rfind("#", 0) == 0) {
+        header.push_back(line);
         std::string strnum = first_numberstring(line);
         igroup = atoi(strnum.c_str());
+        groupnr.push_back(igroup);
         if(counter>-1) {
           top_picks.push_back(sel);
         }
@@ -124,13 +128,17 @@ int run(double prob1, double prob2, double prob3, int trial) {
   picked.reserve(top_picks.size());
   std::vector<int> selproj;//bookkeep if group got Nth pick or random. should be length of the number of groups
   selproj.reserve(top_picks.size());
+  std::vector<int> match; //selected project for group of students
+  match.reserve(top_picks.size());
+  
   for(int i = 0; i<top_picks.size(); ++i) {
     picked.push_back(0);
+    match.push_back(-1);
   }
   
   std::srand(std::time(0)); // use current time as seed for random generator
   
-  for(int i = 0; i<top_picks.size(); ++i) {
+  for(int i = 0; i<top_picks.size(); ++i) { //loop over student groups
     std::vector<int> sel = top_picks.at(i);
     double rnd = dis(gen);
     hRndNum->Fill(rnd);
@@ -163,7 +171,8 @@ int run(double prob1, double prob2, double prob3, int trial) {
       }
     }
     selproj.push_back(isel);
-    
+
+    match[i] = psel;
     picked[psel]++;
     hSelProj->Fill(isel);
     hSelPicks->Fill(psel);
@@ -187,7 +196,13 @@ int run(double prob1, double prob2, double prob3, int trial) {
 
   TParameter<double> *pAvgHap = new TParameter<double>;
   pAvgHap->SetVal((double)happiness/(double)selproj.size());
-    
+
+  TTree *treeMatch = new TTree("treeMatch","treeMatch");
+  treeMatch->Branch("header",&header);
+  treeMatch->Branch("groupnr", &groupnr);
+  treeMatch->Branch("match",&match);
+  treeMatch->Fill();
+  
   TFile *fout = new TFile(Form("matchmaking_gaus_%.0f_%.0f_%.0f_%d.root",prob1,prob2,prob3,trial),"RECREATE");
   hProb->Write();
   hTopPicks->Write();
@@ -202,6 +217,8 @@ int run(double prob1, double prob2, double prob3, int trial) {
   hAvgHapFrac2->Write();
   hAvgHapFrac3->Write();
   hAvgHapFrac4->Write();
+
+  treeMatch->Write();
 
   fout->Write();
   fout->Close();
