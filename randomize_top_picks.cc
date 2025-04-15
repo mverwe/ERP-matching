@@ -37,12 +37,12 @@ int main() {
   std::string line;
   if ( infile.is_open() ) { // always check whether the file is open
     while (  std::getline(infile,line) ) { 
-      int igroup = -1;
+      //int igroup = -1;
 
       if (line.rfind("#", 0) == 0) {
         header.push_back(line);
         std::string strnum = first_numberstring(line);
-        igroup = atoi(strnum.c_str());
+        //igroup = atoi(strnum.c_str());
         if(counter>-1) {
           top_picks.push_back(sel);
         }
@@ -83,9 +83,9 @@ int main() {
   for(int i = 0; i<shuffled.size(); ++i) {
     int iline = shuffled.at(i);
     fout << header.at(iline) << std::endl;
-    std::vector<int> sel = top_picks.at(iline);
-    for(int j = 0; j<sel.size(); ++j) {
-      fout << sel.at(j) << std::endl;
+    std::vector<int> picks = top_picks.at(iline);
+    for(int j = 0; j<picks.size(); ++j) {
+      fout << picks.at(j) << std::endl;
     }
   }
   fout.close();
