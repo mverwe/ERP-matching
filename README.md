@@ -21,7 +21,7 @@ The CSV file that will be obtained from `qualtrics` survey can be converted to p
 
 ## Matching projects to students
 To avoid biases we first randomize the order in which groups are considered with `randomize_top_picks.cc`.
-Next we will run the matching code many times (for example 100 thousand) to make sure we sample a large phase space of possible configurations.
+Next we will run the matching code (`matchmaking.cc`) many times (for example 100 thousand) to make sure we sample a large phase space of possible configurations.
 The matching code performs the following steps:
 1. Generate a random number, $A$, to select a project ($p_{i}$ is the probability to get the i<sup>th</sup> preferred project and is an adjustable parameter of the code)
   * $0<A<p_{1}$ → top 1 selected
