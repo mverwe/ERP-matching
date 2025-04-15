@@ -19,10 +19,10 @@ F77SRC =
 COMMONOBJ =
 
 
-PROGSRC = generate_pseudodata.cc matchmaking.cc process_CSV_qualtrics.cc
-PROGOBJ = generate_pseudodata.o matchmaking.o process_CSV_qualtrics.o
+PROGSRC = generate_pseudodata.cc matchmaking.cc process_CSV_qualtrics.cc randomize_top_picks.cc
+PROGOBJ = generate_pseudodata.o matchmaking.o process_CSV_qualtrics.o randomize_top_picks.o
 
-all : generate_pseudodata matchmaking process_CSV_qualtrics
+all : generate_pseudodata matchmaking process_CSV_qualtrics randomize_top_picks
 
 INCLUDE += `root-config --cflags`
 LIBRARIES  += `root-config --glibs`
@@ -36,11 +36,14 @@ matchmaking : matchmaking.o $(COMMONOBJ)
 process_CSV_qualtrics : process_CSV_qualtrics.o $(COMMONOBJ)
 	$(CXX) $(LDFLAGS) -o $@ $@.o $(COMMONOBJ) $(LIBRARIES)
 
+randomize_top_picks : randomize_top_picks.o $(COMMONOBJ)
+	$(CXX) $(LDFLAGS) -o $@ $@.o $(COMMONOBJ) $(LIBRARIES)
+
 clean:
 	rm -vf $(COMMONOBJ) $(PROGOBJ)
 
 realclean: clean
-	rm -vf generate_pseudodata matchmaking process_CSV_qualtrics
+	rm -vf generate_pseudodata matchmaking process_CSV_qualtrics randomize_top_picks
 
 .cc.o:         $<
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c $< -o $@

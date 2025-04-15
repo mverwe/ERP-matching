@@ -23,7 +23,7 @@ with open(opt.file, newline='') as f:
         print(f"{row['Q2_2']}")
         print(f"{row['Q2_3']}")
 
-        scriptFile.write('# group %s email contactperson: %s\n' % (row['Q1'],row['Q5']))
+        scriptFile.write('# group %s  email contactperson: %s\n' % (row['Q1'],row['Q5']))
         scriptFile.write('%s\n' % row['Q2_1'])
         scriptFile.write('%s\n' % row['Q2_2'])
         scriptFile.write('%s\n' % row['Q2_3'])
