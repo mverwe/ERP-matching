@@ -95,7 +95,7 @@ int run(double prob1, double prob2, double prob3, int trial) {
     }
   }
  
-  //Need top pick project for each group
+  //Need to pick project for each group
 
   std::random_device rd;  // Used to seed the generator
   std::mt19937 gen(rd()); // Mersenne Twister generator
