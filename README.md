@@ -26,4 +26,4 @@ The matching code performs the following steps:
 * Generate a random number, $A$, to select a project
   * $0<A<p_{1}$ → top 1 selected
   * $p_{1}<A<(p_{1}+p_{2})$ → top 2 selected
-  * $(p_{1}+p_{2})<A<(p_{1}+p_{2}+p_{3})$ → top 2 selected
+  * $(p_{1}+p_{2})<A<(p_{1}+p_{2}+p_{3})$ → top 3 selected
