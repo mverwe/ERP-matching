@@ -25,8 +25,8 @@ Next we will run the matching code (`matchmaking.cc`) many times (for example 10
 The matching code performs the following steps:
 1. Generate a random number, $A$, to select a project for the group being considered ($p_{i}$ is the probability to get the i<sup>th</sup> preferred project and is an adjustable parameter of the code)
   * $0<A<p_{1}$ → top 1 selected
-  * $p_{1}<A<(p_{1}+p_{2})$ → top 2 selected
-  * $(p_{1}+p_{2})<A<(p_{1}+p_{2}+p_{3})$ → top 3 selected
+  * $p_{1} \le A<(p_{1}+p_{2})$ → top 2 selected
+  * $(p_{1}+p_{2}) \le A<(p_{1}+p_{2}+p_{3})$ → top 3 selected
 2. Is the project already assigned to another group?
   * Yes: repeat step 1
   * No: assign project to group
@@ -35,3 +35,5 @@ The matching code performs the following steps:
   * {100,80,60,10} ponts for getting top {1,2,3,random} choice. Note: happiness scores are adjustable.
 5. Calculate average happiness of the student population when all groups have an assigned project.
 5. Repeat process thousands of times to find optimal configuration.
+
+The full workflow can be run using `runMatchmaking.sh`.
