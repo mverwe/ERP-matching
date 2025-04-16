@@ -29,8 +29,8 @@ int main(int argc, char *argv[]) {
 
   std::copy(argv, argv + argc, std::ostream_iterator<char *>(std::cout, "\n"));
 
-  if(argc != 2) {
-    std::cout << "command line input missing. usage: ./randomize_top_picks inputfile.dat" << std::endl;
+  if(argc != 3) {
+    std::cout << "command line input missing. usage: ./randomize_top_picks inputfile.dat outputfile.dat" << std::endl;
     return 1;
   }
 
@@ -83,7 +83,7 @@ int main(int argc, char *argv[]) {
   ofstream fout;
   const char *dir = getenv("PWD");
   char buff[100];
-  snprintf(buff, sizeof(buff), "%s/top_picks_shuffle.dat", dir);
+  snprintf(buff, sizeof(buff), "%s/%s", dir,argv[2]);
   std::string outFileName  = buff;
 
   fout.open(outFileName);
