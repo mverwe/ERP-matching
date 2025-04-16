@@ -2,7 +2,9 @@
 code to match student preferences with projects
 
 ## Prerequisites
-For visualization the `ROOT` package is used. You can get a procompiled version from here: https://root.cern/install/
+* `C++20` compiler
+* `python3`
+* For visualization the `ROOT` package is used. You can get a procompiled version from here: https://root.cern/install/
 
 ## Installation
 The C++ code can be compiled using the `Makefile`. Just type `make`.
