@@ -30,3 +30,13 @@
 *.exe
 *.out
 *.app
+
+# Executables of this repo
+generate_pseudodata
+matchmaking
+process_CSV_qualtrics
+randomize_top_picks
+
+
+# ROOT files
+*.root
