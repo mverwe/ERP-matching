@@ -27,13 +27,13 @@ std::string first_numberstring(std::string const & str)
 
 int main(int argc, char *argv[]) {
 
-  std::copy(argv, argv + argc, std::ostream_iterator<char *>(std::cout, "\n"));
+  //std::copy(argv, argv + argc, std::ostream_iterator<char *>(std::cout, "\n"));
 
   if(argc != 3) {
     std::cout << "command line input missing. usage: ./randomize_top_picks inputfile.dat outputfile.dat" << std::endl;
     return 1;
   }
-
+  bool verbose = true;//false;//true;//
   
   std::ifstream infile(argv[1]);
  
@@ -41,7 +41,13 @@ int main(int argc, char *argv[]) {
   std::vector<std::vector<int>> top_picks; //length of number of groups
   int counter = -1;
   std::vector<int> sel;
+  std::vector<int> groups;
 
+  std::vector<int> proj;
+  for(int i = 0; i<34; ++i) {
+    proj.push_back(0);
+  }
+  
   std::string line;
   if ( infile.is_open() ) { // always check whether the file is open
     while (  std::getline(infile,line) ) { 
@@ -50,7 +56,8 @@ int main(int argc, char *argv[]) {
       if (line.rfind("#", 0) == 0) {
         header.push_back(line);
         std::string strnum = first_numberstring(line);
-        //igroup = atoi(strnum.c_str());
+        int igroup = atoi(strnum.c_str());
+        groups.push_back(igroup);
         if(counter>-1) {
           top_picks.push_back(sel);
         }
@@ -59,6 +66,7 @@ int main(int argc, char *argv[]) {
       } else {
         int isel = atoi(line.c_str());
         sel.push_back(isel);
+        proj[isel-1]+=1;
       }
     }
     //push last set of picks
@@ -75,9 +83,12 @@ int main(int argc, char *argv[]) {
  
   std::shuffle(shuffled.begin(), shuffled.end(), g);
 
-  std::copy(shuffled.begin(), shuffled.end(), std::ostream_iterator<int>(std::cout, " "));
-  std::cout << '\n';
+  if(verbose) {
+    std::copy(shuffled.begin(), shuffled.end(), std::ostream_iterator<int>(std::cout, " "));
+    std::cout << '\n';
+  }
 
+  
 
   //output text file
   ofstream fout;
@@ -96,6 +107,64 @@ int main(int argc, char *argv[]) {
       fout << picks.at(j) << std::endl;
     }
   }
+  
+  std::sort(groups.begin(), groups.end());
+  if(verbose) {
+    std::cout << "groups: " << std::endl;
+    std::copy(groups.begin(), groups.end(), std::ostream_iterator<int>(std::cout, " "));
+    std::cout << '\n';
+  }
+    
+  //check which groups are missing
+  std::vector<int> missing;
+  for(int i = 1; i<35; ++i) {
+    if (std::binary_search(groups.begin(), groups.end(), i)) {
+      if(verbose) std::cout << "group " << i << " submitted preferences" << std::endl;
+    }
+    else
+      missing.push_back(i);
+  }
+  
+  if(verbose) {
+    std::cout << "groups that didn't sumbmit preferences: " << std::endl;
+    std::copy(missing.begin(), missing.end(), std::ostream_iterator<int>(std::cout, " "));
+    std::cout << '\n';
+
+    std::cout << "number of groups: " << groups.size() << " + " << missing.size() << " = " << groups.size() +  missing.size() << std::endl;
+  }
+
+  //generate random picks for mising groups
+  std::vector<double> weights;
+  for(int i = 0; i<34; ++i) {
+    if(proj[i]==0) weights.push_back(1.);
+    else
+      weights.push_back(1./(double)proj[i]);
+  }
+  if(verbose) {
+    std::copy(proj.begin(), proj.end(), std::ostream_iterator<int>(std::cout, " "));
+    std::cout << '\n';
+    std::copy(weights.begin(), weights.end(), std::ostream_iterator<double>(std::cout, " "));
+    std::cout << '\n';
+  }
+  
+  std::discrete_distribution<> d(weights.begin(), weights.end());
+  for(int imis : missing) {
+    fout << "# group " << imis << " random" << std::endl;
+    fout << d(g)+1 << std::endl;
+    fout << d(g)+1 << std::endl;
+    fout << d(g)+1 << std::endl;
+    //int iproj = d(g);
+    //std::cout << imis << " proj: " << iproj << "  pop: " << weights[iproj] << std::endl;
+  }
+
+  //print project picks
+  int np = 0;
+  for(int i = 0; i<34; ++i) {
+    std::cout << "project " << i+1 << ": " << proj[i] << " picked" << std::endl;
+    if(proj[i]>0) np++;
+  }
+  std::cout << "number of projects that was picked at least once: " << np << std::endl;
+    
   fout.close();
   
 }

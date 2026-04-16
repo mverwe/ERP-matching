@@ -18,7 +18,7 @@
 
 using namespace std;
 
-int run(double prob1 = 40., double prob2 = 35., double prob3 = 25., int trial = 0, std::string strfile = "/Users/mverweij/wrk/UU/ExperimentalDesign/ERP-matching/top_picks_shuffle.dat");
+int run(double prob1 = 40., double prob2 = 35., double prob3 = 25., int trial = 0, std::string strfile = "/Users/mverweij/wrk/UU/ExperimentalDesign/ERP-matching/top_picks_shuffle.dat", int isuf = 0);
 
 std::string first_numberstring(std::string const & str)
 {
@@ -38,26 +38,27 @@ int main(int argc, char *argv[]) {
 
   std::copy(argv, argv + argc, std::ostream_iterator<char *>(std::cout, "\n"));
 
-  if(argc != 3) {
-    std::cout << "command line input missing. usage: ./matchmaking inputfile.dat 10" << std::endl;
+  if(argc != 4) {
+    std::cout << "command line input missing. usage: ./matchmaking inputfile.dat 10 1" << std::endl;
     return 1;
   }
 
   std::string instr(argv[1]);
   
   int ntrials = atoi(argv[2]);//10000;
+  int isuf = atoi(argv[3]);
   for(int i = 0; i<ntrials; ++i) {
-    //run(40.,35.,25.,i);
-    //run(50.,30.,20.,i);
-    // run(60.,20.,10.,i);
-    //run(70.,15.,5.,i);
-    run(58.,26.,16.,i,instr); //based on output of run(70.,15.,5.,i);
+    run(40.,35.,25.,i,instr,isuf);
+    //run(50.,30.,20.,i,instr,isuf);
+    //run(60.,30.,10.,i,instr,isuf);
+    //run(70.,20.,10.,i,instr,isuf);
+    //run(58.,26.,16.,i,instr,isuf); //based on output of run(70.,15.,5.,i);
   }
  
   return 0;
 }
 
-int run(double prob1, double prob2, double prob3, int trial, std::string strfile) {
+int run(double prob1, double prob2, double prob3, int trial, std::string strfile, int isuf) {
 
   //Assign probability for 1st, 2nd, 3rd. Deal with random assignment later?
   double prob[3] = {prob1, prob2, prob3};//{40.,35.,25.};
@@ -65,6 +66,9 @@ int run(double prob1, double prob2, double prob3, int trial, std::string strfile
   std::ifstream infile(strfile.c_str());
   //std::ifstream infile("/Users/mverweij/wrk/UU/ExperimentalDesign/ProjectAllocation/top_picks_gaus.dat");
 
+  std::random_device rd;  // Used to seed the generator
+  std::mt19937 gen(rd()); // Mersenne Twister generator
+  
   std::string line;
 
   std::vector<std::vector<int>> top_picks; //length of number of groups
@@ -98,18 +102,19 @@ int run(double prob1, double prob2, double prob3, int trial, std::string strfile
 
   
   TH1D *hTopPicks = new TH1D("hTopPicks","hTopPicks",50,0.5,50.5);
+  TH1D *hTopPicksNoRnd = new TH1D("hTopPicksNoRnd","hTopPicksNoRnd",50,0.5,50.5);
 
   for(int i = 0; i<top_picks.size(); ++i) {
     std::vector<int> sel = top_picks.at(i);
     for(int j = 0; j<sel.size(); ++j) {
       hTopPicks->Fill(sel.at(j));
+      if (header[i].find("random") == std::string::npos) hTopPicksNoRnd->Fill(sel.at(j));
     }
   }
  
   //Need to pick project for each group
 
-  std::random_device rd;  // Used to seed the generator
-  std::mt19937 gen(rd()); // Mersenne Twister generator
+
   std::uniform_real_distribution<> dis(0., 100.);
 
   TH1D *hRndNum = new TH1D("hRndNum","hRndNum",100,0.,100.);
@@ -144,6 +149,7 @@ int run(double prob1, double prob2, double prob3, int trial, std::string strfile
   }
   
   std::srand(std::time(0)); // use current time as seed for random generator
+  static std::uniform_int_distribution<int> distp(1,picked.size());
   
   for(int i = 0; i<top_picks.size(); ++i) { //loop over student groups
     std::vector<int> sel = top_picks.at(i);
@@ -159,50 +165,71 @@ int run(double prob1, double prob2, double prob3, int trial, std::string strfile
     
     hRndPicks->Fill(psel);
 
-    if(picked[psel]>0) {
-      double rnd = dis(gen);
-      if(rnd<(prob[0]+prob[1])) isel = 1;
-      else                      isel = 2;
+    int idraws = 0;
+    while(picked[psel-1]>0 && idraws<10) { //check if selected project is already taken. if yes, redraw
+      rnd = dis(gen);
+      if(rnd<prob[0])      isel = 0;
+      else if(rnd<(prob[0]+prob[1])) isel = 1;
+      else                 isel = 2;
       psel = sel.at(isel);
-
-      if(picked[psel]>0) {
-        isel = 2;
-
-        if(picked[psel]>0) {
-          //need to select a project randomly
-          isel = 3;
-          while(picked[psel]>0) {
-            psel = std::rand() % picked.size();
-          }
-        }
+      idraws++;
+    }
+    
+    if(picked[psel-1]>0) { //didn't manage to match to a preferred project
+      //need to select a project randomly
+      isel = 3;
+      //std::cout << "isel " << isel << " psel " << psel << " picked "<< picked[psel-1]<< " avil " << count(picked.begin(), picked.end(), 0) << std::endl;
+      //std::copy(picked.begin(), picked.end(), std::ostream_iterator<int>(std::cout, " "));
+      //std::cout << '\n';
+      while(picked[psel-1]>0 && count(picked.begin(), picked.end(), 0)>0) {
+        //psel = std::rand() % picked.size();
+        //psel+=1;
+        psel = distp(gen);
+      }
+      // std::cout << "isel " << isel << " psel " << psel << std::endl;
+      if(picked[psel-1]>0) {
+        std::cout << "PROBLEM: couldn't find randomly an available project." << std::endl;
+        std::cout << "print picked vector" << std::endl;
+        std::copy(picked.begin(), picked.end(), std::ostream_iterator<int>(std::cout, " "));
+        std::cout << '\n';
       }
     }
-    selproj.push_back(isel);
+    selproj.push_back(isel); 
 
     match[i] = psel;
-    picked[psel]++;
-    hSelProj->Fill(isel);
+    picked[psel-1]++;
+    if (header[i].find("random") == std::string::npos) {//only fill for groups that provided preference
+      hSelProj->Fill(isel);
+    }
     hSelPicks->Fill(psel);
   }
 
   int happiness = 0;
-  int score[4] = {100,80,70,20};//{100,80,60,10};
+  int score[4] = {100,80,60,5};//{100,80,60,10};
+  double npref = 0.;
   for(int i = 0; i<selproj.size(); ++i) {
-    happiness+=score[selproj.at(i)];
+    if (header[i].find("random") != std::string::npos) { //don't include groups without preference in score
+      //std::cout << header[i] << std::endl;
+    }
+    else {
+      happiness+=score[selproj.at(i)];
+      npref+=1.;
+    }
   }
+    
 
-  double avghap = (double)happiness/(double)selproj.size();
+  double avghap = (double)happiness/npref;
   
   hAvgHappiness->Fill(avghap);
   
-  double ngroups = (double)top_picks.size();
-  hAvgHapFrac1->Fill(avghap,hSelProj->GetBinContent(1)/ngroups);
-  hAvgHapFrac2->Fill(avghap,hSelProj->GetBinContent(2)/ngroups);
-  hAvgHapFrac3->Fill(avghap,hSelProj->GetBinContent(3)/ngroups);
-  hAvgHapFrac4->Fill(avghap,hSelProj->GetBinContent(4)/ngroups);
+  //double ngroups = (double)top_picks.size();
+  hAvgHapFrac1->Fill(avghap,hSelProj->GetBinContent(1)/npref);
+  hAvgHapFrac2->Fill(avghap,hSelProj->GetBinContent(2)/npref);
+  hAvgHapFrac3->Fill(avghap,hSelProj->GetBinContent(3)/npref);
+  hAvgHapFrac4->Fill(avghap,hSelProj->GetBinContent(4)/npref);
 
   TParameter<double> *pAvgHap = new TParameter<double>;
-  pAvgHap->SetVal((double)happiness/(double)selproj.size());
+  pAvgHap->SetVal(avghap);
 
   TTree *treeMatch = new TTree("treeMatch","treeMatch");
   treeMatch->Branch("header",&header);
@@ -210,9 +237,10 @@ int run(double prob1, double prob2, double prob3, int trial, std::string strfile
   treeMatch->Branch("match",&match);
   treeMatch->Fill();
   
-  TFile *fout = new TFile(Form("matchmaking_gaus_%.0f_%.0f_%.0f_%d.root",prob1,prob2,prob3,trial),"RECREATE");
+  TFile *fout = new TFile(Form("matchmaking_%.0f_%.0f_%.0f_%d_%d.root",prob1,prob2,prob3,trial,isuf),"RECREATE");
   hProb->Write();
   hTopPicks->Write();
+  hTopPicksNoRnd->Write();
   hSelProj->Write();
   hSelPicks->Write();
   hRndProj->Write();
@@ -232,6 +260,7 @@ int run(double prob1, double prob2, double prob3, int trial, std::string strfile
 
   delete hProb;
   delete hTopPicks;
+  delete hTopPicksNoRnd;
   delete hSelProj;
   delete hSelPicks;
   delete hRndProj;
@@ -243,6 +272,8 @@ int run(double prob1, double prob2, double prob3, int trial, std::string strfile
   delete hAvgHapFrac2;
   delete hAvgHapFrac3;
   delete hAvgHapFrac4;
+  delete treeMatch;
+  delete fout;
   
   return 0;
 }
