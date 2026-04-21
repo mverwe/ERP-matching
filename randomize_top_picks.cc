@@ -29,14 +29,16 @@ int main(int argc, char *argv[]) {
 
   //std::copy(argv, argv + argc, std::ostream_iterator<char *>(std::cout, "\n"));
 
-  if(argc != 3) {
-    std::cout << "command line input missing. usage: ./randomize_top_picks inputfile.dat outputfile.dat" << std::endl;
+  if(argc != 5) {
+    std::cout << "command line input missing. usage: ./randomize_top_picks inputfile.dat outputfile.dat num_groups num_pref" << std::endl;
     return 1;
   }
   bool verbose = true;//false;//true;//
   
   std::ifstream infile(argv[1]);
- 
+  int num_groups = atoi(argv[3]);
+  int num_pref = atoi(argv[4]);
+
   std::vector<string> header;
   std::vector<std::vector<int>> top_picks; //length of number of groups
   int counter = -1;
@@ -44,7 +46,7 @@ int main(int argc, char *argv[]) {
   std::vector<int> groups;
 
   std::vector<int> proj;
-  for(int i = 0; i<34; ++i) {
+  for(int i = 0; i<num_groups; ++i) {   ///TO DO: make number of projects flexible
     proj.push_back(0);
   }
   
@@ -117,7 +119,7 @@ int main(int argc, char *argv[]) {
     
   //check which groups are missing
   std::vector<int> missing;
-  for(int i = 1; i<35; ++i) {
+  for(int i = 1; i<=num_groups; ++i) {   //CHECK
     if (std::binary_search(groups.begin(), groups.end(), i)) {
       if(verbose) std::cout << "group " << i << " submitted preferences" << std::endl;
     }
@@ -135,7 +137,7 @@ int main(int argc, char *argv[]) {
 
   //generate random picks for mising groups
   std::vector<double> weights;
-  for(int i = 0; i<34; ++i) {
+  for(int i = 0; i<num_groups; ++i) {
     if(proj[i]==0) weights.push_back(1.);
     else
       weights.push_back(1./(double)proj[i]);
@@ -150,16 +152,16 @@ int main(int argc, char *argv[]) {
   std::discrete_distribution<> d(weights.begin(), weights.end());
   for(int imis : missing) {
     fout << "# group " << imis << " random" << std::endl;
-    fout << d(g)+1 << std::endl;
-    fout << d(g)+1 << std::endl;
-    fout << d(g)+1 << std::endl;
+    for(int j = 0; j<num_pref; ++j) {
+      fout << d(g)+1 << std::endl;
+    }
     //int iproj = d(g);
     //std::cout << imis << " proj: " << iproj << "  pop: " << weights[iproj] << std::endl;
   }
 
   //print project picks
   int np = 0;
-  for(int i = 0; i<34; ++i) {
+  for(int i = 0; i<num_groups; ++i) {
     std::cout << "project " << i+1 << ": " << proj[i] << " picked" << std::endl;
     if(proj[i]>0) np++;
   }

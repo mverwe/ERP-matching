@@ -18,7 +18,7 @@
 
 using namespace std;
 
-int run(std::vector<double> prob = {40.,35.,20.}, int trial = 0, std::string strfile = "/Users/mverweij/wrk/UU/ExperimentalDesign/ERP-matching/top_picks_shuffle.dat", int isuf = 0);
+int run(double prob1 = 40., double prob2 = 35., double prob3 = 25., int trial = 0, std::string strfile = "/Users/mverweij/wrk/UU/ExperimentalDesign/ERP-matching/top_picks_shuffle.dat", int isuf = 0);
 
 std::string first_numberstring(std::string const & str)
 {
@@ -47,39 +47,24 @@ int main(int argc, char *argv[]) {
   
   int ntrials = atoi(argv[2]);//10000;
   int isuf = atoi(argv[3]);
-  //std::vector<double> prob = {58.,26.,16.};
-  std::vector<double> prob = {30.,25.,20.,15.,10.};
   for(int i = 0; i<ntrials; ++i) {
-    run(prob,i,instr,isuf);
+    //run(40.,35.,25.,i,instr,isuf);
+    //run(50.,30.,20.,i,instr,isuf);
+    //run(60.,30.,10.,i,instr,isuf);
+    //run(70.,20.,10.,i,instr,isuf);
+    run(58.,26.,16.,i,instr,isuf); //based on output of run(70.,15.,5.,i);
   }
  
   return 0;
 }
 
-int run(std::vector<double> prob, int trial, std::string strfile, int isuf) {
+int run(double prob1, double prob2, double prob3, int trial, std::string strfile, int isuf) {
 
-
-  double  sum_of_elems = 0.;
-  for (auto& n : prob)
-     sum_of_elems += n;
-  if(sum_of_elems<100.) {
-    std::cout << "WARNING: total probability less than 100 (" << sum_of_elems << "). Will most likely cause an out-of-bound crash" << std::endl;
-  }
+  const int nproj = 34;
   
   //Assign probability for 1st, 2nd, 3rd. Deal with random assignment later?
-  //double prob[3] = {prob1, prob2, prob3};//{40.,35.,25.};
-  std::vector<double> probcum;
-  double probsum = 0.;
-  for(int i = 0; i<prob.size(); i++) {
-    probsum += prob[i];
-    probcum.push_back(probsum);
-  }
-
-  std::cout << "probcum: " << std::endl;
-  for (auto i: probcum)
-    std::cout << i << ' ';
-  std::cout << " " << std::endl;
-  
+  double prob[3] = {prob1, prob2, prob3};//{40.,35.,25.};
+   
   std::ifstream infile(strfile.c_str());
   //std::ifstream infile("/Users/mverweij/wrk/UU/ExperimentalDesign/ProjectAllocation/top_picks_gaus.dat");
 
@@ -136,53 +121,52 @@ int run(std::vector<double> prob, int trial, std::string strfile, int isuf) {
 
   TH1D *hRndNum = new TH1D("hRndNum","hRndNum",100,0.,100.);
   
-  TH1D *hSelProj = new TH1D("hSelProj","hSelProj",6,-0.5,5.5);
+  TH1D *hSelProj = new TH1D("hSelProj","hSelProj",5,-0.5,4.5);
   TH1D *hSelPicks = new TH1D("hSelPicks","hSelPicks",50,0.5,50.5);
   
-  TH1D *hRndProj = new TH1D("hRndProj","hRndProj",6,-0.5,5.5);
+  TH1D *hRndProj = new TH1D("hRndProj","hRndProj",5,-0.5,4.5);
   TH1D *hRndPicks = new TH1D("hRndPicks","hRndPicks",50,0.5,50.5);
 
-  TH1D *hAvgHappiness = new TH1D("hAvgHappiness","hAvgHappiness",300,0.,300.);
-  TH2D *hAvgHapFrac1 = new TH2D("hAvgHapFrac1","hAvgHapFrac1",300,0.,300.,40,0.,1.);
-  TH2D *hAvgHapFrac2 = new TH2D("hAvgHapFrac2","hAvgHapFrac2",300,0.,300.,40,0.,1.);
-  TH2D *hAvgHapFrac3 = new TH2D("hAvgHapFrac3","hAvgHapFrac3",300,0.,300.,40,0.,1.);
-  TH2D *hAvgHapFrac4 = new TH2D("hAvgHapFrac4","hAvgHapFrac4",300,0.,300.,40,0.,1.);
-  TH2D *hAvgHapFrac5 = new TH2D("hAvgHapFrac5","hAvgHapFrac5",300,0.,300.,40,0.,1.);
-  TH2D *hAvgHapFrac6 = new TH2D("hAvgHapFrac6","hAvgHapFrac6",300,0.,300.,40,0.,1.);
+  TH1D *hAvgHappiness = new TH1D("hAvgHappiness","hAvgHappiness",100,0.,100.);
+  TH2D *hAvgHapFrac1 = new TH2D("hAvgHapFrac1","hAvgHapFrac1",100,0.,100.,40,0.,1.);
+  TH2D *hAvgHapFrac2 = new TH2D("hAvgHapFrac2","hAvgHapFrac2",100,0.,100.,40,0.,1.);
+  TH2D *hAvgHapFrac3 = new TH2D("hAvgHapFrac3","hAvgHapFrac3",100,0.,100.,40,0.,1.);
+  TH2D *hAvgHapFrac4 = new TH2D("hAvgHapFrac4","hAvgHapFrac4",100,0.,100.,40,0.,1.);
+  
 
-  TH1D *hProb = new TH1D("hProb","hProb",10,-0.5,9.5);
-  for(int i = 0; i<prob.size(); ++i)
+  TH1D *hProb = new TH1D("hProb","hProb",5,-0.5,4.5);
+  for(int i = 0; i<4; ++i)
     hProb->SetBinContent(i+1,prob[i]);
   
-  TH1D *hProbCum = new TH1D("hProbCum","hProbCum",10,-0.5,9.5);
-  for(int i = 0; i<probcum.size(); ++i)
-    hProbCum->SetBinContent(i+1,probcum[i]);
-  
   std::vector<int> picked; //should be length of number of available projects
-  picked.reserve(top_picks.size());
+  picked.reserve(nproj);
   std::vector<int> selproj;//bookkeep if group got Nth pick or random. should be length of the number of groups
   selproj.reserve(top_picks.size());
   std::vector<int> match; //selected project for group of students
   match.reserve(top_picks.size());
+
+  for(int i =0; i<nproj; ++i) {
+    picked.push_back(0);
+  }
   
   for(int i = 0; i<top_picks.size(); ++i) {
-    picked.push_back(0);
     match.push_back(-1);
   }
   
   std::srand(std::time(0)); // use current time as seed for random generator
   static std::uniform_int_distribution<int> distp(1,picked.size());
-
+  
   for(int i = 0; i<top_picks.size(); ++i) { //loop over student groups
+
+    if(header[i].find("random") != std::string::npos) continue; //skip groups that didn't provide input
+    
     std::vector<int> sel = top_picks.at(i);
     double rnd = dis(gen);
     hRndNum->Fill(rnd);
     int isel = -1;
-    for(int ip = 0; ip<probcum.size(); ip++) { 
-      if(rnd<probcum[ip] && isel<0) isel = ip;
-      //else if(rnd<(prob[0]+prob[1])) isel = 1;
-      //else                 isel = 2;
-    }
+    if(rnd<prob[0])      isel = 0;
+    else if(rnd<(prob[0]+prob[1])) isel = 1;
+    else                 isel = 2;
     hRndProj->Fill(isel);
 
     int psel = sel.at(isel);
@@ -191,18 +175,17 @@ int run(std::vector<double> prob, int trial, std::string strfile, int isuf) {
 
     int idraws = 0;
     while(picked[psel-1]>0 && idraws<10) { //check if selected project is already taken. if yes, redraw
-      isel = -1;
       rnd = dis(gen);
-      for(int ip = 0; ip<probcum.size(); ip++) { 
-        if(rnd<probcum[ip] && isel<0) isel = ip;
-      }
+      if(rnd<prob[0])      isel = 0;
+      else if(rnd<(prob[0]+prob[1])) isel = 1;
+      else                 isel = 2;
       psel = sel.at(isel);
       idraws++;
     }
     
     if(picked[psel-1]>0) { //didn't manage to match to a preferred project
       //need to select a project randomly
-      isel = 5;
+      isel = 3;
       //std::cout << "isel " << isel << " psel " << psel << " picked "<< picked[psel-1]<< " avil " << count(picked.begin(), picked.end(), 0) << std::endl;
       //std::copy(picked.begin(), picked.end(), std::ostream_iterator<int>(std::cout, " "));
       //std::cout << '\n';
@@ -214,7 +197,7 @@ int run(std::vector<double> prob, int trial, std::string strfile, int isuf) {
       // std::cout << "isel " << isel << " psel " << psel << std::endl;
       if(picked[psel-1]>0) {
         std::cout << "PROBLEM: couldn't find randomly an available project." << std::endl;
-        std::cout << "print picked vector" << std::endl;
+        std::cout << "print picked vector " << picked.size()  << " ngroups: " << top_picks.size() << std::endl;
         std::copy(picked.begin(), picked.end(), std::ostream_iterator<int>(std::cout, " "));
         std::cout << '\n';
       }
@@ -230,9 +213,8 @@ int run(std::vector<double> prob, int trial, std::string strfile, int isuf) {
   }
 
   int happiness = 0;
-  int score[6] = {100,80,60,50,40,5};//{100,80,60,10};
+  int score[4] = {100,80,60,5};//{100,80,60,10};
   double npref = 0.;
-  //for(int i = 0; i<selproj.size(); ++i) {
   for(int i = 0; i<selproj.size(); ++i) {
     if (header[i].find("random") != std::string::npos) { //don't include groups without preference in score
       //std::cout << header[i] << std::endl;
@@ -242,7 +224,7 @@ int run(std::vector<double> prob, int trial, std::string strfile, int isuf) {
       npref+=1.;
     }
   }
-  std::cout << "npref: " << npref << std::endl;
+    
 
   double avghap = (double)happiness/npref;
   
@@ -253,8 +235,6 @@ int run(std::vector<double> prob, int trial, std::string strfile, int isuf) {
   hAvgHapFrac2->Fill(avghap,hSelProj->GetBinContent(2)/npref);
   hAvgHapFrac3->Fill(avghap,hSelProj->GetBinContent(3)/npref);
   hAvgHapFrac4->Fill(avghap,hSelProj->GetBinContent(4)/npref);
-  hAvgHapFrac5->Fill(avghap,hSelProj->GetBinContent(5)/npref);
-  hAvgHapFrac6->Fill(avghap,hSelProj->GetBinContent(6)/npref);
 
   TParameter<double> *pAvgHap = new TParameter<double>;
   pAvgHap->SetVal(avghap);
@@ -265,9 +245,8 @@ int run(std::vector<double> prob, int trial, std::string strfile, int isuf) {
   treeMatch->Branch("match",&match);
   treeMatch->Fill();
   
-  TFile *fout = new TFile(Form("matchmaking_%.0f_%.0f_%.0f_%.0f_%.0f_%d_%d.root",prob[0],prob[1],prob[2],prob[3],prob[4],trial,isuf),"RECREATE");
+  TFile *fout = new TFile(Form("matchmaking_%.0f_%.0f_%.0f_%d_%d.root",prob1,prob2,prob3,trial,isuf),"RECREATE");
   hProb->Write();
-  hProbCum->Write();
   hTopPicks->Write();
   hTopPicksNoRnd->Write();
   hSelProj->Write();
@@ -281,17 +260,13 @@ int run(std::vector<double> prob, int trial, std::string strfile, int isuf) {
   hAvgHapFrac2->Write();
   hAvgHapFrac3->Write();
   hAvgHapFrac4->Write();
-  hAvgHapFrac5->Write();
-  hAvgHapFrac6->Write();
 
   treeMatch->Write();
 
   fout->Write();
   fout->Close();
 
-  //clear memory
   delete hProb;
-  delete hProbCum;
   delete hTopPicks;
   delete hTopPicksNoRnd;
   delete hSelProj;
@@ -305,8 +280,6 @@ int run(std::vector<double> prob, int trial, std::string strfile, int isuf) {
   delete hAvgHapFrac2;
   delete hAvgHapFrac3;
   delete hAvgHapFrac4;
-  delete hAvgHapFrac5;
-  delete hAvgHapFrac6;
   delete treeMatch;
   delete fout;
   
