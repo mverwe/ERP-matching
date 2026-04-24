@@ -19,10 +19,11 @@ This generates a plain text file called `top_picks_gaus.dat` which can be inspec
 For the pseudodata a top 3 of preferred projects for 42 student groups is randomly generated. The popularity of the projects is drawn from a Gaussian with a mean of 0.7 and standard deviation of 0.15. This means some projects will appear more often in the top 3 of the groups than others. 
 
 ### Survey data
-The CSV file that will be obtained from `qualtrics` survey can be converted to plain text format with `process_CSV_qualtrics.cc` or `process_CSV_qualtrics.py`
+The CSV file that will be obtained from `qualtrics` survey can be converted to plain text format with `process_CSV_qualtrics.py`.
 
 ## Matching projects to students
-To avoid biases we first randomize the order in which groups are considered with `randomize_top_picks.cc`.
+To avoid biases we first randomize the order in which groups are considered with `randomize_top_picks.cc`. At this step we also generate random preferences for groups that haven't submitted project prefences.
+
 Next we will run the matching code (`matchmaking.cc`) many times (for example 100 thousand) to make sure we sample a large phase space of possible configurations.
 The matching code performs the following steps:
 1. Generate a random number, $A$, to select a project for the group being considered ($p_{i}$ is the probability to get the i<sup>th</sup> preferred project and is an adjustable parameter of the code)
@@ -32,12 +33,12 @@ The matching code performs the following steps:
 2. Is the project already assigned to another group?
   * Yes: repeat step 1
   * No: assign project to group
-3. If no project from top 3 is available, select a project randomly
-4. Calculate happiness factor of the student grouop
+3. If no project from submitted preferences is available, select a project randomly
+4. Calculate happiness factor of the student group
   * {100,80,60,10} points for getting top {1,2,3,random} choice. Note: happiness scores are adjustable.
 5. Calculate average happiness of the student population when all groups have an assigned project.
 6. Repeat process thousands of times to find optimal configuration. For the optimal configuration we maximize the average happiness score.
 
-Note: code was adapated in 2026 to receive a top 5 of preferences instead of top 3.
+Note: code was adapted in 2026 to receive a top 5 of preferences instead of top 3.
 
 The full workflow can be run using `runMatchmaking.sh`.
