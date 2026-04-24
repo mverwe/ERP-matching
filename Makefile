@@ -19,10 +19,10 @@ F77SRC =
 COMMONOBJ =
 
 
-PROGSRC = generate_pseudodata.cc matchmaking.cc matchmakingNoRandom.cc process_CSV_qualtrics.cc randomize_top_picks.cc
-PROGOBJ = generate_pseudodata.o matchmaking.o matchmakingNoRandom.o process_CSV_qualtrics.o randomize_top_picks.o
+PROGSRC = generate_pseudodata.cc matchmaking.cc matchmakingNoRandom.cc process_CSV_qualtrics.cc randomize_top_picks.cc visualize_survey.cc
+PROGOBJ = generate_pseudodata.o matchmaking.o matchmakingNoRandom.o process_CSV_qualtrics.o randomize_top_picks.o visualize_survey.o
 
-all : generate_pseudodata matchmaking matchmakingNoRandom process_CSV_qualtrics randomize_top_picks
+all : generate_pseudodata matchmaking matchmakingNoRandom process_CSV_qualtrics randomize_top_picks visualize_survey
 
 INCLUDE += `root-config --cflags`
 LIBRARIES  += `root-config --glibs`
@@ -42,11 +42,14 @@ process_CSV_qualtrics : process_CSV_qualtrics.o $(COMMONOBJ)
 randomize_top_picks : randomize_top_picks.o $(COMMONOBJ)
 	$(CXX) $(LDFLAGS) -o $@ $@.o $(COMMONOBJ) $(LIBRARIES)
 
+visualize_survey : visualize_survey.o $(COMMONOBJ)
+	$(CXX) $(LDFLAGS) -o $@ $@.o $(COMMONOBJ) $(LIBRARIES)
+
 clean:
 	rm -vf $(COMMONOBJ) $(PROGOBJ)
 
 realclean: clean
-	rm -vf generate_pseudodata matchmaking matchmakingNoRandom process_CSV_qualtrics randomize_top_picks
+	rm -vf generate_pseudodata matchmaking matchmakingNoRandom process_CSV_qualtrics randomize_top_picks visualize_survey
 
 .cc.o:         $<
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c $< -o $@

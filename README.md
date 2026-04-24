@@ -36,6 +36,8 @@ The matching code performs the following steps:
 4. Calculate happiness factor of the student grouop
   * {100,80,60,10} points for getting top {1,2,3,random} choice. Note: happiness scores are adjustable.
 5. Calculate average happiness of the student population when all groups have an assigned project.
-5. Repeat process thousands of times to find optimal configuration. For the optimal configuration we maximize the average happiness score.
+6. Repeat process thousands of times to find optimal configuration. For the optimal configuration we maximize the average happiness score.
+
+Note: code was adapated in 2026 to receive a top 5 of preferences instead of top 3.
 
 The full workflow can be run using `runMatchmaking.sh`.

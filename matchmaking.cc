@@ -75,10 +75,10 @@ int run(std::vector<double> prob, int trial, std::string strfile, int isuf) {
     probcum.push_back(probsum);
   }
 
-  std::cout << "probcum: " << std::endl;
-  for (auto i: probcum)
-    std::cout << i << ' ';
-  std::cout << " " << std::endl;
+  //std::cout << "probcum: " << std::endl;
+  //for (auto i: probcum)
+  //  std::cout << i << ' ';
+  //std::cout << " " << std::endl;
   
   std::ifstream infile(strfile.c_str());
   //std::ifstream infile("/Users/mverweij/wrk/UU/ExperimentalDesign/ProjectAllocation/top_picks_gaus.dat");
@@ -242,7 +242,7 @@ int run(std::vector<double> prob, int trial, std::string strfile, int isuf) {
       npref+=1.;
     }
   }
-  std::cout << "npref: " << npref << std::endl;
+  //std::cout << "npref: " << npref << std::endl;
 
   double avghap = (double)happiness/npref;
   
