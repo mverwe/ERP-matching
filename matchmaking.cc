@@ -131,7 +131,6 @@ int run(std::vector<double> prob, int trial, std::string strfile, int isuf) {
  
   //Need to pick project for each group
 
-
   std::uniform_real_distribution<> dis(0., 100.);
 
   TH1D *hRndNum = new TH1D("hRndNum","hRndNum",100,0.,100.);
@@ -169,11 +168,31 @@ int run(std::vector<double> prob, int trial, std::string strfile, int isuf) {
     picked.push_back(0);
     match.push_back(-1);
   }
-  
+  //set pre-assignments here by setting picked and match
+  picked[29-1] = 1; //project 29 already taken
+  int group_pos = std::find(groupnr.begin(), groupnr.end(), 13) - groupnr.begin(); //find position of group 1 in groupnr vector
+  match[group_pos] = 29; //assign project 29 to group 13
+  selproj[group_pos] = 0; //mark as 1st pick for group 13
+  hSelProj->Fill(1.); //fill for group 13 that got 1st pick
+  hSelPicks->Fill(29);
+
+  picked[25-1] = 1; //project 19 already taken
+  group_pos = std::find(groupnr.begin(), groupnr.end(), 15) - groupnr.begin();
+  match[group_pos] = 25; //assign project 25 to group 15
+  selproj[group_pos] = 0; //mark as 1st pick for group 15
+  hSelProj->Fill(1.); //fill for group 15 that got 1st pick
+  hSelPicks->Fill(25);
+
   std::srand(std::time(0)); // use current time as seed for random generator
   static std::uniform_int_distribution<int> distp(1,picked.size());
 
   for(int i = 0; i<top_picks.size(); ++i) { //loop over student groups
+    //skip groups that already have a project assigned.
+    if(match.at(i)>-1) {
+     // picked.at(match.at(i)-1)++;
+      continue;
+    }
+
     std::vector<int> sel = top_picks.at(i);
     double rnd = dis(gen);
     hRndNum->Fill(rnd);

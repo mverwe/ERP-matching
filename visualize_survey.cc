@@ -32,17 +32,17 @@ std::string first_numberstring(std::string const & str) {
 
 int main(int argc, char *argv[]) {
 
-    std::copy(argv, argv + argc, std::ostream_iterator<char *>(std::cout, "\n"));
+  std::copy(argv, argv + argc, std::ostream_iterator<char *>(std::cout, "\n"));
 
-    if(argc != 2) {
-        std::cout << "command line input missing. usage: ./visualize_survey inputfile.dat" << std::endl;
+  if(argc != 2) {
+    std::cout << "command line input missing. usage: ./visualize_survey inputfile.dat" << std::endl;
     return 1;
-    }
+  }
 
-    std::string instr(argv[1]);
-    std::ifstream infile(instr.c_str());
+  std::string instr(argv[1]);
+  std::ifstream infile(instr.c_str());
 
-      std::string line;
+  std::string line;
 
   std::vector<std::vector<int>> top_picks; //length of number of groups
   int counter = -1;
@@ -80,6 +80,8 @@ int main(int argc, char *argv[]) {
   TH1D *hPick4= new TH1D("hPick4","hPick4",50,0.5,50.5);
   TH1D *hPick5= new TH1D("hPick5","hPick5",50,0.5,50.5);
 
+  TH1D *hPickAll= new TH1D("hPickAll","hPickAll",50,0.5,50.5);
+  
   for(int i = 0; i<top_picks.size(); ++i) {
     std::vector<int> sel = top_picks.at(i);
     //std::cout << "group " << groupnr.at(i) << " header: " << header[i] << std::endl;
@@ -94,15 +96,37 @@ int main(int argc, char *argv[]) {
       else if(j==3) hPick4->Fill(sel.at(j));
       else if(j==4) hPick5->Fill(sel.at(j));
 
+      hPickAll->Fill(sel.at(j));
+
       //if(j==0) std::cout << "pick 1: " << sel.at(j) << std::endl;
 
       //print when open project (19 and 25) appears
-        if(sel.at(j)==19 || sel.at(j)==25) {
-            std::cout << "===" << std::endl;
-            std::cout << "group " << groupnr.at(i) << " header: " << header[i] << std::endl;
-            std::cout << "pick " << j+1 << ": " << sel.at(j) << std::endl;
-            std::cout << "===" << std::endl;
-        }
+      if(sel.at(j)==19 || sel.at(j)==25) {
+        std::cout << "===" << std::endl;
+        std::cout << "group " << groupnr.at(i) << " header: " << header[i] << std::endl;
+        std::cout << "pick " << j+1 << ": " << sel.at(j) << std::endl;
+        std::cout << "===" << std::endl;
+      }
+    }
+  }
+
+  std::cout << "\n\n" << std::endl;
+
+  for(int i = 0; i<top_picks.size(); ++i) {
+    std::vector<int> sel = top_picks.at(i);
+    //std::cout << "group " << groupnr.at(i) << " header: " << header[i] << std::endl;
+    if (header[i].find("random") != std::string::npos) {
+      std::cout << "group " << groupnr.at(i) << " header: " << header[i] << std::endl;
+      continue;
+    }
+    for(int j = 0; j<sel.size(); ++j) {
+      //print when Nadine's projects (29 and 30) appears
+      if(sel.at(j)==29 || sel.at(j)==30) {
+        std::cout << "===" << std::endl;
+        std::cout << "group " << groupnr.at(i) << " header: " << header[i] << std::endl;
+        std::cout << "pick " << j+1 << ": " << sel.at(j) << std::endl;
+        std::cout << "===" << std::endl;
+      }
     }
   }
 
@@ -112,6 +136,7 @@ int main(int argc, char *argv[]) {
   hPick3->Write();
   hPick4->Write();
   hPick5->Write();
+  hPickAll->Write();
 
   fout->Write();
   fout->Close();
